@@ -1,11 +1,58 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Button,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useContext, useLayoutEffect } from "react";
 import { MEALS } from "../data/dummy-data";
 import MealDetails from "../components/MealDetails";
 import SubTitle from "../components/MealDetail/Subtitls";
 import List from "../components/MealDetail/List";
-function MealDetailsScreen({ route }) {
+import IconButton from "../components/IconButton";
+import { FavoritesContext } from "../store/context/redux/favorites-context";
+
+function MealDetailsScreen({ route, navigation }) {
+  const favoriteMealCtx = useContext(FavoritesContext);
   const mealId = route.params.mealId;
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+
+  const mealIsFavorite = favoriteMealCtx.ids.includes(mealId);
+
+  function changefavoriteStatusHandler() {
+    // console.log(mealId);
+    if (mealIsFavorite) {
+      favoriteMealCtx.removeFavorite(mealId);
+    } else {
+      favoriteMealCtx.addFavorite(mealId);
+    }
+  }
+  function handlefavorites() {
+    navigation.navigate("favorites");
+  }
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <View style={styles.favs}>
+            <IconButton
+              onPress={changefavoriteStatusHandler}
+              icon={mealIsFavorite ? "star" : "star-outline"}
+              color="white"
+            />
+            <Button
+              title=" Viewfavorites"
+              color={"white"}
+              style={[styles.favs]}
+              onPress={handlefavorites}
+            />
+          </View>
+        );
+      },
+    });
+  }, [navigation, changefavoriteStatusHandler]);
 
   return (
     <ScrollView style={styles.rootContainer}>
@@ -56,5 +103,15 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     width: "80%",
+  },
+
+  favs: {
+    flexDirection: "row",
+    color: "white",
+    backgroundColor: "orange",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 12,
+    padding: 4,
   },
 });
